@@ -65,8 +65,6 @@ services:
     runtime: static
     buildCommand: cd banking-ui && npm install && npm run build
     staticPublishPath: ./banking-ui/dist
-    region: oregon
-    plan: free
     pullRequestPreviewsEnabled: true
     headers:
       - path: /*

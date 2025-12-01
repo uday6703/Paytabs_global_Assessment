@@ -7,6 +7,44 @@ This guide provides step-by-step instructions to deploy the Banking System POC t
 1. A [GitHub](https://github.com) account
 2. A [Render](https://render.com) account (free tier available)
 3. Git installed on your local machine
+4. (Optional for local testing) Docker and Docker Compose installed
+
+---
+
+## 🐳 Docker Files Overview
+
+This project includes the following Docker-related files:
+
+| File | Purpose |
+|------|---------|
+| `system1-gateway/Dockerfile` | Docker image for Gateway Service (Java 17) |
+| `system2-corebank/Dockerfile` | Docker image for Core Banking Service (Java 17) |
+| `banking-ui/Dockerfile` | Docker image for React Frontend (Nginx) |
+| `banking-ui/nginx.conf` | Nginx configuration for SPA routing |
+| `docker-compose.yml` | Local development with all services |
+| `*/.dockerignore` | Files to exclude from Docker builds |
+
+---
+
+## 🧪 Local Testing with Docker
+
+Before deploying to Render, you can test locally:
+
+```bash
+# Build and run all services
+docker-compose up --build
+
+# Access the application
+# - Banking UI: http://localhost:80
+# - Gateway API: http://localhost:8081
+# - Core Bank API: http://localhost:8082
+
+# Stop all services
+docker-compose down
+
+# Stop and remove volumes (clean start)
+docker-compose down -v
+```
 
 ---
 

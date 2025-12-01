@@ -1,0 +1,95 @@
+# Docker Compose for local development and testing
+# Run: docker-compose up --build
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: banking-postgres
+    environment:
+      POSTGRES_DB: corebankdb
+      POSTGRES_USER: bankuser
+      POSTGRES_PASSWORD: bankpass123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bankuser -d corebankdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # System 2 - Core Banking Service
+  system2-corebank:
+    build:
+      context: ./system2-corebank
+      dockerfile: Dockerfile
+    container_name: system2-corebank
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/corebankdb
+      - SPRING_DATASOURCE_USERNAME=bankuser
+      - SPRING_DATASOURCE_PASSWORD=bankpass123
+      - CORS_ORIGINS=http://localhost:5173,http://localhost:3000,http://localhost:80
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8082/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # System 1 - Gateway Service
+  system1-gateway:
+    build:
+      context: ./system1-gateway
+      dockerfile: Dockerfile
+    container_name: system1-gateway
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SYSTEM2_URL=http://system2-corebank:8082
+      - CORS_ORIGINS=http://localhost:5173,http://localhost:3000,http://localhost:80
+    depends_on:
+      system2-corebank:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Banking UI - React Frontend
+  banking-ui:
+    build:
+      context: ./banking-ui
+      dockerfile: Dockerfile
+      args:
+        - VITE_GATEWAY_URL=http://localhost:8081
+        - VITE_CORE_URL=http://localhost:8082
+    container_name: banking-ui
+    ports:
+      - "80:80"
+    depends_on:
+      - system1-gateway
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: banking-network

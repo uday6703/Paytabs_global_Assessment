@@ -1,5 +1,6 @@
 # Render Blueprint for Banking System POC
 # This file defines all services for the banking system
+# Deploy with: Connect GitHub repo to Render and use Blueprint
 
 databases:
   - name: banking-postgres
@@ -9,7 +10,7 @@ databases:
     region: oregon
 
 services:
-  # System 2 - Core Banking Service
+  # System 2 - Core Banking Service (Deploy this FIRST)
   - type: web
     name: system2-corebank
     runtime: docker
@@ -35,8 +36,10 @@ services:
           property: password
       - key: CORS_ORIGINS
         value: "*"
+      - key: AES_SECRET_KEY
+        generateValue: true
 
-  # System 1 - Gateway Service
+  # System 1 - Gateway Service (Deploy SECOND)
   - type: web
     name: system1-gateway
     runtime: docker
@@ -56,13 +59,14 @@ services:
       - key: CORS_ORIGINS
         value: "*"
 
-  # Banking UI - React Frontend (Static Site)
+  # Banking UI - React Frontend (Static Site - Deploy LAST)
   - type: web
     name: banking-ui
     runtime: static
     buildCommand: cd banking-ui && npm install && npm run build
     staticPublishPath: ./banking-ui/dist
     region: oregon
+    plan: free
     pullRequestPreviewsEnabled: true
     headers:
       - path: /*

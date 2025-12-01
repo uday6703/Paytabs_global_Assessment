@@ -22,26 +22,10 @@ services:
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
-      - key: DATABASE_HOST
+      - key: DATABASE_URL
         fromDatabase:
           name: banking-postgres
-          property: host
-      - key: DATABASE_PORT
-        fromDatabase:
-          name: banking-postgres
-          property: port
-      - key: DATABASE_NAME
-        fromDatabase:
-          name: banking-postgres
-          property: database
-      - key: DATABASE_USERNAME
-        fromDatabase:
-          name: banking-postgres
-          property: user
-      - key: DATABASE_PASSWORD
-        fromDatabase:
-          name: banking-postgres
-          property: password
+          property: connectionString
       - key: CORS_ORIGINS
         value: "*"
       - key: AES_SECRET_KEY

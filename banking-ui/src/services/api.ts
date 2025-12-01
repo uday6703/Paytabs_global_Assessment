@@ -1,9 +1,25 @@
 import axios from 'axios'
 import { TransactionRequest, TransactionResponse, CardInfo, TransactionHistory } from '../types'
 
+// Helper function to ensure URL has https:// prefix
+function ensureHttps(url: string | undefined): string {
+  if (!url) return ''
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url
+  }
+  // Add https:// prefix for production URLs
+  return `https://${url}`
+}
+
 // API base URLs - use environment variables for production, proxy for development
-const GATEWAY_URL = import.meta.env.VITE_GATEWAY_URL || '/api/gateway'
-const CORE_URL = import.meta.env.VITE_CORE_URL || '/api/core'
+const rawGatewayUrl = import.meta.env.VITE_GATEWAY_URL || ''
+const rawCoreUrl = import.meta.env.VITE_CORE_URL || ''
+
+// In development (no env vars), use proxy paths; in production, ensure https://
+const GATEWAY_URL = rawGatewayUrl ? ensureHttps(rawGatewayUrl) : '/api/gateway'
+const CORE_URL = rawCoreUrl ? ensureHttps(rawCoreUrl) : '/api/core'
+
+console.log('API Configuration:', { GATEWAY_URL, CORE_URL })
 
 // Create axios instance with default config
 const gatewayApi = axios.create({

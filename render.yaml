@@ -59,14 +59,13 @@ services:
       - key: CORS_ORIGINS
         value: "*"
 
-# Static Sites (separate section)
-staticSites:
-  # Banking UI - React Frontend (Deploy LAST)
-  - name: banking-ui
+  # Banking UI - React Frontend (Static Site - Deploy LAST)
+  - type: web
+    name: banking-ui
+    runtime: static
+    rootDir: ./banking-ui
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
-    rootDir: ./banking-ui
-    pullRequestPreviewsEnabled: true
     headers:
       - path: /*
         name: Cache-Control

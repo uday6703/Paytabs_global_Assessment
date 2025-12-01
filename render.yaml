@@ -59,12 +59,13 @@ services:
       - key: CORS_ORIGINS
         value: "*"
 
-  # Banking UI - React Frontend (Static Site - Deploy LAST)
-  - type: web
-    name: banking-ui
-    runtime: static
-    buildCommand: cd banking-ui && npm install && npm run build
-    staticPublishPath: ./banking-ui/dist
+# Static Sites (separate section)
+staticSites:
+  # Banking UI - React Frontend (Deploy LAST)
+  - name: banking-ui
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    rootDir: ./banking-ui
     pullRequestPreviewsEnabled: true
     headers:
       - path: /*
